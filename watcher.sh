@@ -14,12 +14,7 @@ fi
 echo "Montioring $namespace:$deployment for restarts"
 
 while [ true ]; do
-  pod=`kubectl get pods -n $namespace | grep -v grep | grep $deployment`
-  if [ -z "$pod" ]; then
-    echo "Deployment $namespace:$deployment not found"
-    exit 1
-  fi
-  restarts=`echo $pod | awk '{print $4}'`
+  restarts=`kubectl get pods -n $namespace -l app=$deployment -o jsonpath="{.items[0].status.containerStatuses[0].restartCount}"`
   echo "Current restarts count: $restarts"
   if [ $restarts -gt $maxRestarts ]; then
     echo "Maximum number of restarts reached. Scalling $namespace:$deployment down"
